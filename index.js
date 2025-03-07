@@ -41,19 +41,17 @@ async function updateEmbed() {
         const status = await getServerStatus();
         if (!status) return;
 
-        const embed = new EmbedBuilder()
-            .setTitle('Minecraft Server')
-            .setColor(status.online ? 0x00ff00 : 0xff0000)
-            .setDescription(status.online ? '🟢 **Online**' : '🔴 **Offline**')
-            .setImage(BANNER_URL)
-            .addFields(
-                { name: '📌 Server Information', value: `**Server IP:** ${SERVER_IP}\n**Port:** ${JAVA_PORT}\n**Supports:** Java & Bedrock`, inline: false },
-                { name: '👥 Players', value: status.online ? `${status.players.online}/${status.players.max}` : 'N/A', inline: true }
-            )
-            .setFooter({ text: `🔄 Updates every 30 seconds • Today at ${getFormattedTime()}` })
-            .setTimestamp();
-
-        embed.setThumbnail(SERVER_ICON_URL);
+         const timestamp = Math.floor(Date.now() / 1000);
+const embed = new EmbedBuilder()
+    .setTitle('William’s Development Minecraft Server')
+    .setColor(status.online ? 0x00ff00 : 0xff0000)
+    .setDescription(status.online ? '🟢 **Online**' : '🔴 **Offline**')
+    .setImage(BANNER_URL)
+    .addFields(
+        { name: '📌 Server Information', value: `**Server IP:** ${SERVER_IP}\n**Port:** ${JAVA_PORT}\n**Supports:** Java & Bedrock`, inline: false },
+        { name: '👥 Players', value: status.online ? `${status.players.online}/${status.players.max}` : 'N/A', inline: true },
+        { name: '🕒 Last Update', value: `<t:${timestamp}:R>`, inline: false }
+    );
 
         let embedData = {};
         if (fs.existsSync(EMBED_FILE)) {
