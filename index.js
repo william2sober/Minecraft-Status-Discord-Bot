@@ -45,12 +45,12 @@ async function updateEmbed() {
 const embed = new EmbedBuilder()
     .setTitle('William’s Development Minecraft Server')
     .setColor(status.online ? 0x00ff00 : 0xff0000)
-    .setDescription(status.online ? '🟢 **Online**' : '🔴 **Offline**')
+    .setDescription(status.online ? '<:Online:1347736658988105728> **Online**' : '<:Offline:1347736559004418048> **Offline**')
     .setImage(BANNER_URL)
     .addFields(
-        { name: '📌 Server Information', value: `**Server IP:** ${SERVER_IP}\n**Port:** ${JAVA_PORT}\n**Supports:** Java & Bedrock`, inline: false },
-        { name: '👥 Players', value: status.online ? `${status.players.online}/${status.players.max}` : 'N/A', inline: true },
-        { name: '🕒 Last Update', value: `<t:${timestamp}:R>`, inline: false }
+        { name: '<:Pin:1347736882674405489> Server Information', value: `**Server IP:** ${SERVER_IP}\n**Port:** ${JAVA_PORT}\n**Supports:** Java & Bedrock`, inline: false },
+        { name: '<:Players:1347737171213156414> Players', value: status.online ? `${status.players.online}/${status.players.max}` : 'N/A', inline: true },
+        { name: '<:Clock:1347737328126263367> Last Update', value: `<t:${timestamp}:R>`, inline: false }
     );
 
         let embedData = {};
