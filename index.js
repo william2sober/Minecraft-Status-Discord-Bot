@@ -5,10 +5,8 @@ const fs = require('fs');
 const TOKEN = '';
 const CHANNEL_ID = '';
 const SERVER_IP = '';
-const JAVA_PORT = 30000;
+const JAVA_PORT = 00000;
 const EMBED_FILE = 'embed.json';
-const BANNER_URL = '';
-const SERVER_ICON_URL = '';
 
 const client = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages]
@@ -41,17 +39,26 @@ async function updateEmbed() {
         const status = await getServerStatus();
         if (!status) return;
 
-         const timestamp = Math.floor(Date.now() / 1000);
-const embed = new EmbedBuilder()
-    .setTitle('William’s Development Minecraft Server')
-    .setColor(status.online ? 0x00ff00 : 0xff0000)
-    .setDescription(status.online ? '<:Online:1347736658988105728> **Online**' : '<:Offline:1347736559004418048> **Offline**')
-    .setImage(BANNER_URL)
-    .addFields(
-        { name: '<:Pin:1347736882674405489> Server Information', value: `**Server IP:** ${SERVER_IP}\n**Port:** ${JAVA_PORT}\n**Supports:** Java & Bedrock`, inline: false },
-        { name: '<:Players:1347737171213156414> Players', value: status.online ? `${status.players.online}/${status.players.max}` : 'N/A', inline: true },
-        { name: '<:Clock:1347737328126263367> Last Update', value: `<t:${timestamp}:R>`, inline: false }
-    );
+        const guild = client.guilds.cache.first();
+        const serverIconURL = guild.iconURL({ dynamic: true, size: 512 });
+
+        const timestamp = Math.floor(Date.now() / 1000);
+        
+        const onlineEmoji = '🟢'; 
+        const offlineEmoji = '🔴';
+        const onlineColor = '#00FF00';
+        const offlineColor = '#FF0000';
+
+        const embed = new EmbedBuilder()
+            .setTitle('Minecraft Server Status')
+            .setColor(status.online ? onlineColor : offlineColor)
+            .setDescription(status.online ? `${onlineEmoji} **Online**` : `${offlineEmoji} **Offline**`)
+            .setThumbnail(serverIconURL)
+            .addFields(
+                { name: '📍 Server IP', value: `${SERVER_IP}`, inline: true },
+                { name: '👥 Players', value: status.online ? `${status.players.online}/${status.players.max}` : 'N/A', inline: true },
+                { name: '⏰ Last Update', value: `<t:${timestamp}:R>`, inline: true }
+            );
 
         let embedData = {};
         if (fs.existsSync(EMBED_FILE)) {
@@ -86,8 +93,6 @@ const embed = new EmbedBuilder()
 
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
-
-    client.user.setActivity('Checking Server Status', { type: 'PLAYING' });
 
     updateEmbed();
     setInterval(updateEmbed, 30000);
