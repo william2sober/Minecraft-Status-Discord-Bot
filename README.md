@@ -74,4 +74,4 @@ You can replace the default URLs for the server banner (`BANNER_URL`) and icon (
 For support or inquiries, you can reach out via email or Discord:
 
 - Email: [William2sober@gmail.com](mailto:William2sober@gmail.com)
-- Discord: [https://discord.gg/8K2neBXVfg](https://discord.gg/8K2neBXVfg)
+- Discord: [https://discord.gg/8K2neBXVfg](https://discord.gg/G8hJGkZMqD)
