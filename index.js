@@ -5,7 +5,6 @@ const fs = require('fs');
 const TOKEN = '';
 const CHANNEL_ID = '';
 const SERVER_IP = '';
-const JAVA_PORT = 00000;
 const EMBED_FILE = 'embed.json';
 
 const client = new Client({
@@ -14,24 +13,31 @@ const client = new Client({
 
 function getServerStatus() {
     return new Promise((resolve, reject) => {
-        const url = `https://api.mcstatus.io/v2/status/java/${SERVER_IP}:${JAVA_PORT}`;
-        https.get(url, (res) => {
+        const options = {
+            hostname: 'api.mcsrvstat.us',
+            path: `/2/${SERVER_IP}`,
+            method: 'GET',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (MinecraftStatusBot)'
+            }
+        };
+
+        const req = https.request(options, (res) => {
             let data = '';
             res.on('data', chunk => data += chunk);
             res.on('end', () => {
                 try {
                     resolve(JSON.parse(data));
                 } catch (error) {
+                    console.error('JSON parsing failed:', data);
                     reject(error);
                 }
             });
-        }).on('error', reject);
-    });
-}
+        });
 
-function getFormattedTime() {
-    const now = new Date();
-    return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        req.on('error', reject);
+        req.end();
+    });
 }
 
 async function updateEmbed() {
@@ -55,8 +61,8 @@ async function updateEmbed() {
             .setDescription(status.online ? `${onlineEmoji} **Online**` : `${offlineEmoji} **Offline**`)
             .setThumbnail(serverIconURL)
             .addFields(
-                { name: '📍 Server IP', value: `${SERVER_IP}`, inline: true },
-                { name: '👥 Players', value: status.online ? `${status.players.online}/${status.players.max}` : 'N/A', inline: true },
+                { name: '📍 Server IP', value: SERVER_IP, inline: true },
+                { name: '👥 Players', value: status.online && status.players ? `${status.players.online}/${status.players.max}` : 'N/A', inline: true },
                 { name: '⏰ Last Update', value: `<t:${timestamp}:R>`, inline: true }
             );
 
@@ -93,7 +99,6 @@ async function updateEmbed() {
 
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
-
     updateEmbed();
     setInterval(updateEmbed, 30000);
 });
