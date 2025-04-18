@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, EmbedBuilder, ActivityType } = require('discord.js');
 const https = require('https');
 const fs = require('fs');
 
@@ -12,7 +12,7 @@ const client = new Client({
 });
 
 function getServerStatus() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const options = {
             hostname: 'api.mcsrvstat.us',
             path: `/2/${SERVER_IP}`,
@@ -28,14 +28,13 @@ function getServerStatus() {
             res.on('end', () => {
                 try {
                     resolve(JSON.parse(data));
-                } catch (error) {
-                    console.error('JSON parsing failed:', data);
-                    reject(error);
+                } catch {
+                    resolve(null);
                 }
             });
         });
 
-        req.on('error', reject);
+        req.on('error', () => resolve(null));
         req.end();
     });
 }
@@ -49,11 +48,16 @@ async function updateEmbed() {
         const serverIconURL = guild.iconURL({ dynamic: true, size: 512 });
 
         const timestamp = Math.floor(Date.now() / 1000);
-        
+
         const onlineEmoji = '🟢'; 
         const offlineEmoji = '🔴';
         const onlineColor = '#00FF00';
         const offlineColor = '#FF0000';
+
+        client.user.setActivity(
+            `${status.online ? 'Server Online' : 'Server Offline'}`,
+            { type: ActivityType.Watching }
+        );
 
         const embed = new EmbedBuilder()
             .setTitle('Minecraft Server Status')
@@ -68,32 +72,26 @@ async function updateEmbed() {
 
         let embedData = {};
         if (fs.existsSync(EMBED_FILE)) {
-            embedData = JSON.parse(fs.readFileSync(EMBED_FILE, 'utf8'));
+            try {
+                embedData = JSON.parse(fs.readFileSync(EMBED_FILE, 'utf8'));
+            } catch {
+                embedData = { messageId: null };
+            }
         } else {
             fs.writeFileSync(EMBED_FILE, JSON.stringify({ messageId: null }, null, 2));
         }
 
         const channel = await client.channels.fetch(CHANNEL_ID);
-        if (!channel) return console.error('Invalid channel ID.');
+        if (!channel) return;
 
         if (embedData.messageId) {
             try {
                 const message = await channel.messages.fetch(embedData.messageId);
                 await message.edit({ embeds: [embed] });
             } catch {
-                console.error('Failed to edit existing embed. Sending a new one.');
-                const newMessage = await channel.send({ embeds: [embed] });
-                embedData.messageId = newMessage.id;
-                fs.writeFileSync(EMBED_FILE, JSON.stringify(embedData, null, 2));
             }
-        } else {
-            console.log('No embed found, sending a new one.');
-            const newMessage = await channel.send({ embeds: [embed] });
-            embedData.messageId = newMessage.id;
-            fs.writeFileSync(EMBED_FILE, JSON.stringify(embedData, null, 2));
         }
-    } catch (error) {
-        console.error('Error updating embed:', error);
+    } catch {
     }
 }
 
